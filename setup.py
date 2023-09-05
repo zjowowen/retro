@@ -44,6 +44,11 @@ class CMakeBuild(build_ext):
         else:
             build_type = ''
         python_executable = '-DPYTHON_EXECUTABLE:STRING=%s' % sys.executable
+
+        import sysconfig
+        python_include_dir = '-DPYTHON_INCLUDE_DIR=%s' % sysconfig.get_path('include')
+        python_libs = '-DPYTHON_LIBRARY=%s' % sysconfig.get_config_var('LIBDIR')
+
         cmake_exe = find_executable('cmake')
         if not cmake_exe:
             try:
@@ -52,7 +57,7 @@ class CMakeBuild(build_ext):
                 subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'cmake'])
                 import cmake
             cmake_exe = os.path.join(cmake.CMAKE_BIN_DIR, 'cmake')
-        subprocess.check_call([cmake_exe, '.', '-G', 'Unix Makefiles', build_type, pyext_suffix, pylib_dir, python_executable])
+        subprocess.check_call([cmake_exe, '.', '-G', 'Unix Makefiles', build_type, pyext_suffix, pylib_dir, python_executable, python_include_dir, python_libs])
         if self.parallel:
             jobs = '-j%d' % self.parallel
         else:
